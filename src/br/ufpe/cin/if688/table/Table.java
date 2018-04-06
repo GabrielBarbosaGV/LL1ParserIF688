@@ -23,6 +23,38 @@ public final class Table {
         /*
          * Implemente aqui o método para retornar a parsing table
          */
+        Iterator<Production> productions = g.iterator();
+        
+        while (productions.hasNext()) {
+        	Production next = productions.next();
+        	Nonterminal nonTerminal = next.getNonterminal();
+        	List<GeneralSymbol> production = next.getProduction();
+        	
+        	Iterator<GeneralSymbol> symbols =
+        			first.get(nonTerminal).iterator();
+        	
+        	boolean producesEpsilon = false;
+        	
+        	while (symbols.hasNext()) {
+        		GeneralSymbol symbol = symbols.next();
+        		
+        		if (symbol.equals(SpecialSymbol.EPSILON))
+        			producesEpsilon = true;
+        		
+        		parsingTable.put(new LL1Key(nonTerminal, symbol), production);
+        	}
+        	
+        	if (producesEpsilon) {
+        		symbols = follow.get(nonTerminal).iterator();
+        		
+        		while (symbols.hasNext()) {
+        			GeneralSymbol symbol = symbols.next();
+        			
+        			parsingTable.put(new LL1Key(nonTerminal, symbol),
+        					production);
+        		}
+        	}
+        }
         
         return parsingTable;
     }

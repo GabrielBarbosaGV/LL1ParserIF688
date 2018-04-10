@@ -12,10 +12,26 @@ public final class SetGenerator {
     	if (g == null) throw new NullPointerException("g nao pode ser nula.");
         
     	Map<Nonterminal, Set<GeneralSymbol>> first = initializeNonterminalMapping(g);
+    	
     	/*
     	 * Implemente aqui o método para retornar o conjunto first
     	 */
 
+    	Map<Nonterminal, List<Production>> prods =
+    			new HashMap<Nonterminal, List<Production>>();
+
+    	for (Nonterminal nt: g.getNonterminals()) {
+    		prods.put(nt, new ArrayList<Production>());
+    	}
+    	
+    	for (Production p: g.getProductions()) {
+    		prods.get(p.getNonterminal()).add(p);
+    	}
+    	
+    	for (Nonterminal nt: g.getNonterminals()) {
+    		first.get(nt).addAll(getFirstFromNt(nt, prods));
+    	}
+    	
         return first;
     	
     }
@@ -47,7 +63,7 @@ public final class SetGenerator {
     	return result;
     }
     
-    private Set<GeneralSymbol> getFirstFromNt(GeneralSymbol sym, Map<Nonterminal, List<Production>> prods) {
+    private static Set<GeneralSymbol> getFirstFromNt(GeneralSymbol sym, Map<Nonterminal, List<Production>> prods) {
     	Set<GeneralSymbol> myFirst = new HashSet<GeneralSymbol>();
     
     	if ((sym instanceof Terminal) || (sym.equals(SpecialSymbol.EPSILON))) {

@@ -78,7 +78,7 @@ public final class SetGenerator {
 	    		Set<GeneralSymbol> subset;
 	    		
 	    		do {
-	    			symbol = sequence.get(n);
+	    			symbol = sequence.get(n++);
 	    			subset = getFirstFromNt(symbol, prods);
 	    			myFirst.addAll(subset);
 	        	} while ((symbol instanceof Nonterminal) && subset.contains(SpecialSymbol.EPSILON));	

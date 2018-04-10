@@ -38,13 +38,37 @@ public final class SetGenerator {
     //método para inicializar mapeamento nãoterminais -> conjunto de símbolos
     private static Map<Nonterminal, Set<GeneralSymbol>>
     initializeNonterminalMapping(Grammar g) {
-    Map<Nonterminal, Set<GeneralSymbol>> result = 
-        new HashMap<Nonterminal, Set<GeneralSymbol>>();
+    	Map<Nonterminal, Set<GeneralSymbol>> result = 
+    			new HashMap<Nonterminal, Set<GeneralSymbol>>();
 
-    for (Nonterminal nt: g.getNonterminals())
-        result.put(nt, new HashSet<GeneralSymbol>());
+    	for (Nonterminal nt: g.getNonterminals())
+    		result.put(nt, new HashSet<GeneralSymbol>());
 
-    return result;
-}
-
+    	return result;
+    }
+    
+    private Set<GeneralSymbol> getFirstFromNt(GeneralSymbol sym, Map<Nonterminal, List<Production>> prods) {
+    	Set<GeneralSymbol> myFirst = new HashSet<GeneralSymbol>();
+    
+    	if ((sym instanceof Terminal) || (sym.equals(SpecialSymbol.EPSILON))) {
+    		myFirst.add(sym);
+    	} else {
+    		for (Production p: prods.get((Nonterminal) sym)) {
+	    		int n = 0;
+	    		
+	    		List<GeneralSymbol> sequence = p.getProduction();
+	    		
+	    		GeneralSymbol symbol;
+	    		Set<GeneralSymbol> subset;
+	    		
+	    		do {
+	    			symbol = sequence.get(n);
+	    			subset = getFirstFromNt(symbol, prods);
+	    			myFirst.addAll(subset);
+	        	} while ((symbol instanceof Nonterminal) && subset.contains(SpecialSymbol.EPSILON));	
+    		}
+    	}
+    	
+    	return myFirst;
+    }
 } 

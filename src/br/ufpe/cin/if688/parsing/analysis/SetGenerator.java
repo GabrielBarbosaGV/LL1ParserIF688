@@ -15,9 +15,49 @@ public final class SetGenerator {
     	/*
     	 * Implemente aqui o método para retornar o conjunto first
     	 */
+    	
+    	Stack<Nonterminal> currentNt = new Stack<Nonterminal>();
+    	Stack<Set<GeneralSymbol>> currentTs = new Stack<Set<GeneralSymbol>>();
+    	Stack<Stack<Nonterminal>> currentNts = new Stack<Stack<Nonterminal>>();
+    	
+    	Map<Nonterminal, List<List<GeneralSymbol>>> prodMap =
+    			new HashMap<Nonterminal, List<List<GeneralSymbol>>>();
+    	
+    	for (Production p: g.getProductions()) {
+    		if (prodMap.get(p.getNonterminal()) == null)
+    			prodMap.put(p.getNonterminal(), new ArrayList<List<GeneralSymbol>>());
+    		
+    		prodMap.get(p.getNonterminal()).add(p.getProduction());
+    	}
+    	
+    	currentNt.push(g.getStartSymbol());
+    	currentNts.push(new Stack<Nonterminal>());
+		currentTs.push(new HashSet<GeneralSymbol>());
+    	
+    	while(!currentNt.empty()) {
+    		for (List<GeneralSymbol> l: prodMap.get(currentNt.peek())) {
+    			GeneralSymbol symbol = l.get(0);
+    			
+    			if (symbol instanceof Nonterminal) {
+    				currentNts.peek().push((Nonterminal) symbol);
+    			} else {
+    				currentTs.peek().add(symbol);
+    			}
+    		}
+    		
+    		if (!currentNts.peek().isEmpty()) {
+    			currentNt.push(currentNts.peek().pop());
+    			currentNts.push(new Stack<Nonterminal>());
+    			currentTs.push(new HashSet<GeneralSymbol>());
+    		} else {
+    			first.put(currentNt.pop(), currentTs.peek());
+    			Set<GeneralSymbol> childTerminals = currentTs.pop();
+    			currentTs.peek().addAll(childTerminals);
+    			currentNts.pop();
+    		}
+    	}
 
         return first;
-    	
     }
 
     

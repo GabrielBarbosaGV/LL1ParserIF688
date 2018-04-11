@@ -12,10 +12,26 @@ public final class SetGenerator {
     	if (g == null) throw new NullPointerException("g nao pode ser nula.");
         
     	Map<Nonterminal, Set<GeneralSymbol>> first = initializeNonterminalMapping(g);
+    	
     	/*
     	 * Implemente aqui o método para retornar o conjunto first
     	 */
 
+    	Map<Nonterminal, List<Production>> prods =
+    			new HashMap<Nonterminal, List<Production>>();
+
+    	for (Nonterminal nt: g.getNonterminals()) {
+    		prods.put(nt, new ArrayList<Production>());
+    	}
+    	
+    	for (Production p: g.getProductions()) {
+    		prods.get(p.getNonterminal()).add(p);
+    	}
+    	
+    	for (Nonterminal nt: g.getNonterminals()) {
+    		first.get(nt).addAll(getFirstFromNt(nt, prods));
+    	}
+    	
         return first;
     	
     }
@@ -38,13 +54,37 @@ public final class SetGenerator {
     //método para inicializar mapeamento nãoterminais -> conjunto de símbolos
     private static Map<Nonterminal, Set<GeneralSymbol>>
     initializeNonterminalMapping(Grammar g) {
-    Map<Nonterminal, Set<GeneralSymbol>> result = 
-        new HashMap<Nonterminal, Set<GeneralSymbol>>();
+    	Map<Nonterminal, Set<GeneralSymbol>> result = 
+    			new HashMap<Nonterminal, Set<GeneralSymbol>>();
 
-    for (Nonterminal nt: g.getNonterminals())
-        result.put(nt, new HashSet<GeneralSymbol>());
+    	for (Nonterminal nt: g.getNonterminals())
+    		result.put(nt, new HashSet<GeneralSymbol>());
 
-    return result;
-}
-
+    	return result;
+    }
+    
+    private static Set<GeneralSymbol> getFirstFromNt(GeneralSymbol sym, Map<Nonterminal, List<Production>> prods) {
+    	Set<GeneralSymbol> myFirst = new HashSet<GeneralSymbol>();
+    
+    	if ((sym instanceof Terminal) || (sym.equals(SpecialSymbol.EPSILON))) {
+    		myFirst.add(sym);
+    	} else {
+    		for (Production p: prods.get((Nonterminal) sym)) {
+	    		int n = 0;
+	    		
+	    		List<GeneralSymbol> sequence = p.getProduction();
+	    		
+	    		GeneralSymbol symbol;
+	    		Set<GeneralSymbol> subset;
+	    		
+	    		do {
+	    			symbol = sequence.get(n++);
+	    			subset = getFirstFromNt(symbol, prods);
+	    			myFirst.addAll(subset);
+	        	} while ((symbol instanceof Nonterminal) && subset.contains(SpecialSymbol.EPSILON));	
+    		}
+    	}
+    	
+    	return myFirst;
+    }
 } 
